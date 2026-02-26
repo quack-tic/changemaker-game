@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Changemaker – Das Brettspiel</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green: #2ecc71;
+    --green-dark: #1a9c54;
+    --blue: #3498db;
+    --blue-dark: #2176ad;
+    --orange: #e67e22;
+    --orange-dark: #c0660e;
+    --pink: #e84393;
+    --pink-dark: #b52d73;
+    --purple: #6c5ce7;
+    --yellow: #f1c40f;
+    --bg: #0f1923;
+    --bg-light: #172a3a;
+    --bg-card: #1e3548;
+    --text: #ecf0f1;
+    --text-dim: #7f8c8d;
+    --radius: 16px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  .intro-screen {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 2rem;
+    background: 
+      radial-gradient(ellipse at 20% 50%, rgba(46,204,113,0.08) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 20%, rgba(52,152,219,0.08) 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 80%, rgba(232,67,147,0.06) 0%, transparent 50%),
+      var(--bg);
+    animation: fadeIn 0.6s ease;
+  }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+  .intro-screen h1 {
+    font-family: 'Fredoka', sans-serif;
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--green), var(--blue), var(--pink));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.5rem;
+    letter-spacing: -1px;
+  }
+
+  .intro-screen .subtitle {
+    font-size: 1.15rem;
+    color: var(--text-dim);
+    margin-bottom: 2.5rem;
+    max-width: 500px;
+    line-height: 1.6;
+  }
+
+  .player-setup {
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    padding: 2rem;
+    width: min(90%, 460px);
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .player-setup h3 {
+    font-family: 'Fredoka', sans-serif;
+    margin-bottom: 1.2rem;
+    font-size: 1.2rem;
+  }
+
+  .player-input-row {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+    align-items: center;
+  }
+
+  .player-input-row .dot {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .player-input-row input {
+    flex: 1;
+    padding: 0.65rem 1rem;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: var(--bg-light);
+    color: var(--text);
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.95rem;
+    outline: none;
+    transition: border 0.2s;
+  }
+
+  .player-input-row input:focus { border-color: var(--green); }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.85rem 2rem;
+    border: none;
+    border-radius: 12px;
+    font-family: 'Fredoka', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: white;
+  }
+
+  .btn:hover { transform: translateY(-2px); filter: brightness(1.1); }
+  .btn:active { transform: translateY(0); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; filter: none; }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--green), var(--green-dark));
+    margin-top: 1.2rem;
+    width: 100%;
+  }
+
+  .game-screen {
+    display: none;
+    min-height: 100vh;
+    background: 
+      radial-gradient(ellipse at 15% 85%, rgba(46,204,113,0.06) 0%, transparent 40%),
+      radial-gradient(ellipse at 85% 15%, rgba(52,152,219,0.06) 0%, transparent 40%),
+      var(--bg);
+  }
+
+  .game-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.5rem;
+    background: var(--bg-light);
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .game-title {
+    font-family: 'Fredoka', sans-serif;
+    font-size: 1.3rem;
+    background: linear-gradient(135deg, var(--green), var(--blue));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .player-scores {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .player-score {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.9rem;
+    border-radius: 20px;
+    background: rgba(255,255,255,0.05);
+    font-size: 0.85rem;
+    font-weight: 700;
+    transition: all 0.3s;
+  }
+
+  .player-score.active {
+    background: rgba(255,255,255,0.12);
+    box-shadow: 0 0 12px rgba(46,204,113,0.2);
+  }
+
+  .player-score .mini-dot {
+    width: 12px; height: 12px;
+    border-radius: 50%;
+  }
+
+  .board-container {
+    padding: 1.5rem;
+    display: flex;
+    justify-content: center;
+    overflow-x: auto;
+  }
+
+  .board {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+    max-width: 680px;
+    width: 100%;
+  }
+
+  .cell {
+    aspect-ratio: 1;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 700;
+    position: relative;
+    cursor: default;
+    transition: all 0.3s;
+    border: 2px solid transparent;
+    padding: 4px;
+    min-height: 70px;
+  }
+
+  .cell .cell-num { font-family: 'Fredoka', sans-serif; font-size: 1rem; opacity: 0.9; }
+  .cell .cell-icon { font-size: 1.3rem; margin-bottom: 2px; }
+  .cell .cell-label { font-size: 0.55rem; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.75; text-align: center; line-height: 1.2; }
+
+  .cell-env { background: rgba(46,204,113,0.15); border-color: rgba(46,204,113,0.25); }
+  .cell-social { background: rgba(52,152,219,0.15); border-color: rgba(52,152,219,0.25); }
+  .cell-community { background: rgba(232,67,147,0.15); border-color: rgba(232,67,147,0.25); }
+  .cell-digital { background: rgba(108,92,231,0.15); border-color: rgba(108,92,231,0.25); }
+  .cell-event { background: rgba(230,126,34,0.15); border-color: rgba(230,126,34,0.25); }
+  .cell-start { background: rgba(241,196,15,0.2); border-color: rgba(241,196,15,0.4); }
+  .cell-goal { background: linear-gradient(135deg, rgba(46,204,113,0.25), rgba(52,152,219,0.25)); border-color: rgba(46,204,113,0.4); }
+
+  .cell.highlight {
+    box-shadow: 0 0 20px rgba(241,196,15,0.4);
+    border-color: var(--yellow);
+    transform: scale(1.05);
+    z-index: 2;
+  }
+
+  .player-tokens { display: flex; gap: 3px; position: absolute; bottom: 3px; }
+
+  .token {
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.6);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .action-panel {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 0 1.5rem 2rem;
+  }
+
+  .turn-info {
+    text-align: center;
+    padding: 1rem;
+    font-family: 'Fredoka', sans-serif;
+    font-size: 1.1rem;
+  }
+
+  .dice-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .dice {
+    width: 80px; height: 80px;
+    background: var(--bg-card);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Fredoka', sans-serif;
+    font-size: 2.4rem;
+    font-weight: 700;
+    border: 2px solid rgba(255,255,255,0.1);
+    transition: all 0.3s;
+    user-select: none;
+  }
+
+  .dice.rolling { animation: diceRoll 0.5s ease; }
+
+  @keyframes diceRoll {
+    0%, 100% { transform: rotate(0deg) scale(1); }
+    25% { transform: rotate(15deg) scale(1.1); }
+    50% { transform: rotate(-10deg) scale(0.95); }
+    75% { transform: rotate(5deg) scale(1.05); }
+  }
+
+  .btn-roll { background: linear-gradient(135deg, var(--orange), var(--orange-dark)); }
+
+  .scenario-card {
+    display: none;
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    border: 1px solid rgba(255,255,255,0.08);
+    animation: cardIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(20px) scale(0.95); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .scenario-card .category-badge {
+    display: inline-block;
+    padding: 0.3rem 0.8rem;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.75rem;
+  }
+
+  .badge-env { background: rgba(46,204,113,0.2); color: var(--green); }
+  .badge-social { background: rgba(52,152,219,0.2); color: var(--blue); }
+  .badge-community { background: rgba(232,67,147,0.2); color: var(--pink); }
+  .badge-digital { background: rgba(108,92,231,0.2); color: var(--purple); }
+  .badge-event { background: rgba(230,126,34,0.2); color: var(--orange); }
+
+  .scenario-card h3 { font-family: 'Fredoka', sans-serif; font-size: 1.15rem; margin-bottom: 0.6rem; line-height: 1.4; }
+  .scenario-card .story { color: var(--text-dim); line-height: 1.65; margin-bottom: 1.2rem; font-size: 0.92rem; }
+
+  .choices { display: flex; flex-direction: column; gap: 0.6rem; }
+
+  .choice-btn {
+    width: 100%;
+    text-align: left;
+    padding: 0.9rem 1.1rem;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.08);
+    background: var(--bg-light);
+    color: var(--text);
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    line-height: 1.5;
+  }
+
+  .choice-btn:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.15); transform: translateX(4px); }
+  .choice-btn.chosen-good { border-color: var(--green); background: rgba(46,204,113,0.12); }
+  .choice-btn.chosen-ok { border-color: var(--yellow); background: rgba(241,196,15,0.1); }
+  .choice-btn.chosen-bad { border-color: #e74c3c; background: rgba(231,76,60,0.1); }
+
+  .result-text {
+    display: none;
+    margin-top: 1rem;
+    padding: 1rem;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.03);
+    line-height: 1.6;
+    font-size: 0.9rem;
+  }
+
+  .result-text .points-change { font-family: 'Fredoka', sans-serif; font-size: 1.3rem; margin-top: 0.5rem; }
+
+  .btn-next { background: linear-gradient(135deg, var(--blue), var(--blue-dark)); margin-top: 1rem; width: 100%; }
+
+  .win-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15,25,35,0.95);
+    z-index: 100;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 2rem;
+    animation: fadeIn 0.5s ease;
+  }
+
+  .win-overlay .trophy { font-size: 5rem; margin-bottom: 1rem; }
+
+  .win-overlay h2 {
+    font-family: 'Fredoka', sans-serif;
+    font-size: 2.5rem;
+    background: linear-gradient(135deg, var(--yellow), var(--orange));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.5rem;
+  }
+
+  .win-overlay p { color: var(--text-dim); max-width: 400px; line-height: 1.7; margin-bottom: 1.5rem; }
+
+  .final-scores { display: flex; gap: 1.5rem; margin-bottom: 2rem; flex-wrap: wrap; justify-content: center; }
+
+  .final-score-card {
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    padding: 1.2rem 1.8rem;
+    text-align: center;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .final-score-card .name { font-family: 'Fredoka', sans-serif; font-size: 0.95rem; margin-bottom: 0.3rem; }
+  .final-score-card .score { font-family: 'Fredoka', sans-serif; font-size: 2rem; font-weight: 700; }
+
+  .btn-restart { background: linear-gradient(135deg, var(--green), var(--green-dark)); }
+
+  .impact-goal { text-align: center; padding: 0.5rem; font-size: 0.85rem; color: var(--text-dim); }
+  .impact-goal strong { color: var(--yellow); }
+
+  .pool-info {
+    text-align: center;
+    font-size: 0.7rem;
+    color: rgba(255,255,255,0.2);
+    padding: 0.3rem;
+  }
+
+  @media (max-width: 600px) {
+    .board { grid-template-columns: repeat(5, 1fr); gap: 5px; }
+    .cell { min-height: 58px; border-radius: 10px; }
+    .cell .cell-icon { font-size: 1.1rem; }
+    .cell .cell-num { font-size: 0.85rem; }
+    .cell .cell-label { display: none; }
+    .game-header { padding: 0.8rem 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="intro-screen" id="introScreen">
+  <h1>🌍 Changemaker</h1>
+  <p class="subtitle">Zeig, dass du durch eigenes Handeln die Welt verändern kannst. Triff Entscheidungen, sammle Impact-Punkte und werde zum Changemaker!</p>
+  <div class="player-setup">
+    <h3>Wer spielt mit?</h3>
+    <div class="player-input-row">
+      <div class="dot" style="background:var(--green)"></div>
+      <input type="text" id="p1name" placeholder="Spieler 1" maxlength="15">
+    </div>
+    <div class="player-input-row">
+      <div class="dot" style="background:var(--blue)"></div>
+      <input type="text" id="p2name" placeholder="Spieler 2" maxlength="15">
+    </div>
+    <div class="player-input-row">
+      <div class="dot" style="background:var(--pink)"></div>
+      <input type="text" id="p3name" placeholder="Spieler 3 (optional)" maxlength="15">
+    </div>
+    <div class="player-input-row">
+      <div class="dot" style="background:var(--purple)"></div>
+      <input type="text" id="p4name" placeholder="Spieler 4 (optional)" maxlength="15">
+    </div>
+    <button class="btn btn-primary" onclick="startGame()">🎲 Spiel starten!</button>
+  </div>
+</div>
+
+<div class="game-screen" id="gameScreen">
+  <div class="game-header">
+    <div class="game-title">🌍 Changemaker</div>
+    <div class="player-scores" id="playerScores"></div>
+  </div>
+  <div class="impact-goal" id="impactGoal"></div>
+  <div class="board-container">
+    <div class="board" id="board"></div>
+  </div>
+  <div class="action-panel">
+    <div class="turn-info" id="turnInfo"></div>
+    <div class="dice-area" id="diceArea">
+      <div class="dice" id="dice">?</div>
+      <button class="btn btn-roll" id="rollBtn" onclick="rollDice()">🎲 Würfeln</button>
+    </div>
+    <div class="scenario-card" id="scenarioCard">
+      <div class="category-badge" id="scenBadge"></div>
+      <h3 id="scenTitle"></h3>
+      <p class="story" id="scenStory"></p>
+      <div class="choices" id="scenChoices"></div>
+      <div class="result-text" id="resultText"></div>
+      <button class="btn btn-next" id="nextBtn" onclick="nextTurn()" style="display:none">Weiter →</button>
+    </div>
+    <div class="pool-info" id="poolInfo"></div>
+  </div>
+</div>
+
+<div class="win-overlay" id="winOverlay">
+  <div class="trophy">🏆</div>
+  <h2 id="winnerName"></h2>
+  <p id="winMessage"></p>
+  <div class="final-scores" id="finalScores"></div>
+  <button class="btn btn-restart" onclick="location.reload()">🔄 Nochmal spielen</button>
+</div>
+
+<script>
+const COLORS = ['#2ecc71','#3498db','#e84393','#6c5ce7'];
+const WIN_SCORE = 30;
+
+// ============================================================
+// MASSIVE SCENARIO DATABASE — 15+ per category = 80+ total
+// ============================================================
+const SCENARIOS = {
+env: [
+  { title:'Plastik am Flussufer', story:'Du siehst beim Spaziergang am Fluss jede Menge Plastikmüll liegen. Die Strömung trägt es bald ins Meer.', choices:[
+    { text:'🧤 Du organisierst einen Clean-Up mit Freunden und postest Vorher-Nachher-Bilder', points:4, feedback:'Fantastisch! 15 Leute kamen und ihr habt 3 Säcke Müll gesammelt. Die Posts inspirierten andere Gruppen!', level:'good' },
+    { text:'🗑️ Du sammelst den Müll allein auf, so viel du tragen kannst', points:2, feedback:'Gut gemacht! Jede einzelne Aktion zählt.', level:'ok' },
+    { text:'📸 Du machst ein Foto und gehst weiter – „da muss die Stadt ran"', points:0, feedback:'Das Foto verstaubt auf deinem Handy. Manchmal braucht es mehr als Dokumentation.', level:'bad' }
+  ]},
+  { title:'Einwegbecher in der Schulcafeteria', story:'Die Schulcafeteria plant, auf billige Einwegbecher umzusteigen. Tausende Becher Müll pro Monat drohen.', choices:[
+    { text:'📝 Du startest eine Petition und präsentierst der Schulleitung Alternativen', points:4, feedback:'Die Schulleitung war beeindruckt! Ab nächstem Monat gibt es ein Pfandbechersystem.', level:'good' },
+    { text:'☕ Du bringst einfach deinen eigenen Becher mit', points:2, feedback:'Ein guter Anfang! Einige Mitschüler machen es dir nach.', level:'ok' },
+    { text:'🤷 Ist ja nicht dein Problem, du trinkst eh keinen Kaffee', points:-1, feedback:'Manchmal geht es nicht nur um einen selbst, sondern um die Gemeinschaft.', level:'bad' }
+  ]},
+  { title:'Radweg oder Parkplatz?', story:'In deiner Straße soll ein neuer Parkplatz gebaut werden. Es gibt aber auch den Vorschlag für einen sicheren Radweg.', choices:[
+    { text:'🚲 Du sammelst Unterschriften für den Radweg und sprichst mit dem Stadtrat', points:4, feedback:'Der Stadtrat hat zugehört! Ein temporärer Radweg wird als Pilotprojekt gestartet.', level:'good' },
+    { text:'💬 Du postest in der Nachbarschaftsgruppe über die Vorteile des Radwegs', points:2, feedback:'Gute Diskussion! Die Meinungen sind geteilt, aber das Thema ist auf dem Tisch.', level:'ok' },
+    { text:'🅿️ Dir ist egal – deine Eltern brauchen eh den Parkplatz', points:-1, feedback:'Kurzfristig praktisch, aber langfristig profitiert die ganze Nachbarschaft von sicheren Radwegen.', level:'bad' }
+  ]},
+  { title:'Bienen in Gefahr', story:'Im Biologieunterricht lernst du, dass die Bienenpopulation dramatisch sinkt. Dein Schulhof ist eine Betonwüste.', choices:[
+    { text:'🌻 Du startest ein Schulprojekt für bienenfreundliche Blumenbeete', points:4, feedback:'Im Frühling summt es überall! Das Projekt wurde sogar in der Lokalzeitung vorgestellt.', level:'good' },
+    { text:'🪴 Du pflanzt auf dem Balkon bienenfreundliche Blumen', points:2, feedback:'Klein aber wirkungsvoll – dein Balkon wird zum Mini-Biotop!', level:'ok' },
+    { text:'😴 Bienen sind gruselig, sollen die halt woanders hin', points:-1, feedback:'Ohne Bienen keine Äpfel, Erdbeeren oder Schokolade... vielleicht nochmal drüber nachdenken?', level:'bad' }
+  ]},
+  { title:'Fast Fashion Haul', story:'Deine Freundin zeigt dir stolz 20 neue Teile für 30 Euro von einem Online-Billigshop. Alles Wegwerfmode.', choices:[
+    { text:'👗 Du lädst sie zu einem Kleidertausch-Event ein und zeigst Second-Hand-Alternativen', points:4, feedback:'Sie ist begeistert vom Kleidertausch! Drei andere Freundinnen machen jetzt auch mit.', level:'good' },
+    { text:'💬 Du erklärst ihr freundlich, wie Fast Fashion die Umwelt belastet', points:2, feedback:'Sie hört zu und verspricht, beim nächsten Mal bewusster einzukaufen.', level:'ok' },
+    { text:'🛒 Du bestellst gleich selbst – so billig!', points:-1, feedback:'Billig im Preis, teuer für den Planeten. 92 Millionen Tonnen Textilmüll entstehen pro Jahr.', level:'bad' }
+  ]},
+  { title:'Licht aus oder an?', story:'In deiner Schule brennen nachts in allen Klassenzimmern die Lichter. Das fällt dir auf dem Heimweg auf.', choices:[
+    { text:'💡 Du sprichst den Hausmeister an und schlägst Bewegungsmelder und Zeitschaltuhren vor', points:4, feedback:'Die Schule spart 2.000 Euro im Jahr an Stromkosten und 3 Tonnen CO₂!', level:'good' },
+    { text:'📧 Du schreibst eine Mail an die Schulleitung', points:2, feedback:'Guter Impuls! Das Thema kommt auf die Agenda der nächsten Konferenz.', level:'ok' },
+    { text:'🌙 Ist halt so – Schulen sind halt beleuchtet', points:0, feedback:'Unnötiger Energieverbrauch ist vermeidbar. Jede Kilowattstunde zählt.', level:'bad' }
+  ]},
+  { title:'Wasserverschwendung im Sportunterricht', story:'Nach dem Sportunterricht lassen viele die Duschen minutenlang laufen, ohne darunter zu stehen.', choices:[
+    { text:'🚿 Du schlägst dem Sportlehrer Schilder mit Spar-Tipps und kürzere Duschzeiten vor', points:4, feedback:'Die Schilder hängen und der Wasserverbrauch sinkt um 30%!', level:'good' },
+    { text:'💧 Du drehst die leerlaufenden Duschen selbst ab', points:2, feedback:'Direkte Aktion! Manche rollen die Augen, aber du sparst hunderte Liter.', level:'ok' },
+    { text:'🤷 Ist ja nicht dein Wasser', points:-1, feedback:'Trinkwasser ist kostbar – weltweit haben 2 Milliarden Menschen keinen sicheren Zugang.', level:'bad' }
+  ]},
+  { title:'Die Schulreise mit dem Flugzeug?', story:'Eure Klasse plant eine Klassenfahrt. Der Lehrer schlägt einen Kurzstreckenflug nach München vor – es gäbe auch den Zug.', choices:[
+    { text:'🚂 Du recherchierst die Zugverbindung und rechnest den CO₂-Vergleich vor', points:4, feedback:'Die Klasse stimmt für den Zug! Die Zugfahrt wird zum halben Abenteuer.', level:'good' },
+    { text:'✋ Du sagst im Unterricht, dass der Zug umweltfreundlicher wäre', points:2, feedback:'Der Lehrer nimmt den Vorschlag mit in die Planung.', level:'ok' },
+    { text:'✈️ Fliegen ist schneller – wer will schon lange im Zug sitzen?', points:-1, feedback:'Ein Kurzstreckenflug verursacht 10x mehr CO₂ als die Bahn. Und Zugfahren kann richtig Spaß machen!', level:'bad' }
+  ]},
+  { title:'Lebensmittelverschwendung zu Hause', story:'Du merkst, dass eure Familie jede Woche einen halben Kühlschrank wegwirft – abgelaufene Joghurts, welkes Gemüse.', choices:[
+    { text:'📋 Du erstellst einen Wochenplan und führst ein „Reste-Kochen am Freitag" ein', points:4, feedback:'Die Familie spart 40 Euro im Monat und der Biomüll halbiert sich!', level:'good' },
+    { text:'🍌 Du rettest die angeschlagenen Bananen und machst Bananenbrot', points:2, feedback:'Leckeres Bananenbrot! Und drei Bananen weniger im Müll.', level:'ok' },
+    { text:'🗑️ MHD ist MHD – lieber auf Nummer sicher', points:-1, feedback:'Das Mindesthaltbarkeitsdatum heißt „mindestens haltbar bis", nicht „tödlich ab". Riechen und probieren hilft!', level:'bad' }
+  ]},
+  { title:'Der Schulgarten verwildert', story:'Der ehemalige Schulgarten ist völlig zugewachsen. Niemand kümmert sich mehr darum.', choices:[
+    { text:'🌿 Du gründest eine Garten-AG und baust Hochbeete für Schulgemüse', points:4, feedback:'Im Sommer erntet die Mensa eigene Tomaten und Kräuter! Die AG hat 15 Mitglieder.', level:'good' },
+    { text:'🌱 Du pflanzt ein paar Kräuter in den Garten', points:2, feedback:'Ein guter Anfang – Basilikum und Minze wachsen prächtig!', level:'ok' },
+    { text:'🏗️ Lieber asphaltieren, dann kann man da Fußball spielen', points:-1, feedback:'Grünflächen sind wichtig für Klima, Insekten und Erholung. Fußball geht auch woanders.', level:'bad' }
+  ]},
+  { title:'Palmöl überall', story:'Im Supermarkt fällt dir auf, dass fast jedes zweite Produkt Palmöl enthält – schlecht für den Regenwald.', choices:[
+    { text:'🔍 Du erstellst eine Info-Kampagne an der Schule über Palmöl-Alternativen', points:4, feedback:'Mehrere Familien ändern ihre Einkaufsgewohnheiten. Der Bioladen meldet mehr Nachfrage!', level:'good' },
+    { text:'🛒 Du achtest bei deinem eigenen Einkauf auf palmölfreie Produkte', points:2, feedback:'Bewusster Konsum ist ein guter erster Schritt!', level:'ok' },
+    { text:'🤷 Steht doch überall drin, kann man eh nichts machen', points:-1, feedback:'Die Nachfrage bestimmt das Angebot. Jede Kaufentscheidung ist eine Stimme.', level:'bad' }
+  ]},
+  { title:'Müll in der Natur', story:'Beim Wandertag findest du im Wald einen illegalen Müllhaufen – Autoreifen, Farbeimer, Plastik.', choices:[
+    { text:'📞 Du meldest es der Gemeinde, dokumentierst alles mit Fotos und Koordinaten', points:4, feedback:'Die Gemeinde räumt den Müll ab und stellt eine Wildkamera auf. Der Verursacher wird ermittelt!', level:'good' },
+    { text:'📸 Du postest es auf Social Media, um Aufmerksamkeit zu schaffen', points:2, feedback:'Der Post geht lokal viral. Die Gemeinde wird auf das Problem aufmerksam.', level:'ok' },
+    { text:'🚶 Nicht dein Problem – du gehst einfach weiter', points:-1, feedback:'Illegale Müllentsorgung vergiftet Boden und Grundwasser. Wegschauen hilft niemandem.', level:'bad' }
+  ]},
+  { title:'Fleischfreier Montag', story:'In der Schulmensa steht jeden Tag Fleisch auf dem Speiseplan. Ein vegetarischer Tag pro Woche ist im Gespräch.', choices:[
+    { text:'🥗 Du organisierst eine Probewoche mit leckeren vegetarischen Rezepten und sammelst Feedback', points:4, feedback:'80% der Schüler fanden es gut! Ab sofort gibt es jeden Montag ein vegetarisches Menü.', level:'good' },
+    { text:'🌱 Du wählst selbst öfter das vegetarische Gericht', points:2, feedback:'Gutes Vorbild! Ein paar Freunde schließen sich an.', level:'ok' },
+    { text:'🥩 Ohne Fleisch ist es kein richtiges Essen', points:-1, feedback:'Die Tierhaltung verursacht 14% aller Treibhausgase. Weniger Fleisch hilft dem Klima enorm.', level:'bad' }
+  ]},
+  { title:'Trinkflaschen statt Einweg', story:'In deiner Schule werden täglich hunderte Plastikflaschen im Automaten gekauft und weggeworfen.', choices:[
+    { text:'🚰 Du überzeugst die Schulleitung, einen Trinkwasserspender aufzustellen', points:4, feedback:'Der Automat wurde durch einen Wasserspender ersetzt. 500 Flaschen weniger pro Woche!', level:'good' },
+    { text:'🍶 Du nutzt selbst eine Mehrwegflasche und inspirierst Freunde', points:2, feedback:'Drei Freunde kaufen sich auch Mehrwegflaschen. Steter Tropfen höhlt den Stein.', level:'ok' },
+    { text:'💦 Plastikflaschen sind halt praktisch', points:-1, feedback:'8 Millionen Tonnen Plastik landen jährlich im Meer. Mehrweg ist genauso praktisch!', level:'bad' }
+  ]},
+  { title:'Der alte Kühlschrank', story:'Euer 20 Jahre alter Kühlschrank brummt laut und verbraucht dreimal so viel Strom wie ein neuer.', choices:[
+    { text:'📊 Du rechnest deinen Eltern den Stromverbrauch vor und findest ein Förderprogramm', points:4, feedback:'Der neue Kühlschrank spart 200 Euro pro Jahr und die Förderung deckt die Hälfte der Kosten!', level:'good' },
+    { text:'🌡️ Du stellst den Kühlschrank auf die optimale Temperatur ein', points:2, feedback:'Kleine Optimierung, aber immerhin 10% weniger Verbrauch!', level:'ok' },
+    { text:'❄️ Läuft doch noch – warum was ändern?', points:-1, feedback:'Alte Geräte sind Energiefresser. Manchmal ist Austausch die nachhaltigste Lösung.', level:'bad' }
+  ]},
+  { title:'Mikroplastik im Badezimmer', story:'Du liest, dass viele Kosmetikprodukte Mikroplastik enthalten – auch eure Zahnpasta.', choices:[
+    { text:'🔬 Du recherchierst Alternativen, tauscht Produkte aus und teilst eine Liste mit Freunden', points:4, feedback:'10 Familien in deinem Umfeld steigen um. Tausende Mikroplastik-Partikel weniger im Wasser!', level:'good' },
+    { text:'🪥 Du kaufst dir eine mikroplastikfreie Zahnpasta', points:2, feedback:'Guter erster Schritt für dich persönlich!', level:'ok' },
+    { text:'🧴 So winzig kleine Teilchen können doch nicht schaden', points:-1, feedback:'Mikroplastik reichert sich in der Nahrungskette an. Wir essen pro Woche eine Kreditkarte an Plastik!', level:'bad' }
+  ]}
+],
+
+social: [
+  { title:'Der Neue in der Klasse', story:'Ein neuer Schüler kommt aus Syrien in deine Klasse. Er spricht kaum Deutsch und sitzt allein in der Pause.', choices:[
+    { text:'🤝 Du setzt dich zu ihm, lernst ein paar Worte Arabisch und lädst ihn zum Sport ein', points:4, feedback:'Er strahlt! Innerhalb von zwei Wochen hat er Freunde gefunden und sein Deutsch wird täglich besser.', level:'good' },
+    { text:'👋 Du grüßt ihn freundlich, wenn du ihn siehst', points:1, feedback:'Ein Lächeln hilft, aber er sitzt weiterhin oft allein.', level:'ok' },
+    { text:'😶 Nicht dein Problem – er wird schon klarkommen', points:-1, feedback:'Stell dir vor, du wärst allein in einem fremden Land. Jeder braucht manchmal Hilfe.', level:'bad' }
+  ]},
+  { title:'Cybermobbing in der Klasse', story:'In der WhatsApp-Gruppe werden gemeine Memes über einen Mitschüler geteilt. Einige lachen, er leidet still.', choices:[
+    { text:'🛑 Du sagst klar „Das ist nicht okay" und sprichst privat mit dem Betroffenen', points:4, feedback:'Dein Mut hat andere inspiriert. Das Mobbing hörte auf und der Mitschüler dankt dir von Herzen.', level:'good' },
+    { text:'🚫 Du verlässt die Gruppe aus Protest', points:2, feedback:'Ein Zeichen – aber vielleicht braucht es auch eine klare Stimme IN der Gruppe.', level:'ok' },
+    { text:'😂 Du schickst ein Lach-Emoji – ist doch nur Spaß', points:-2, feedback:'Für ihn war es kein Spaß. Worte im Internet verletzen genauso.', level:'bad' }
+  ]},
+  { title:'Ungleichheit im Sportverein', story:'Im Fußballverein bekommen die Jungs die besten Trainingszeiten. Die Mädchen müssen immer Freitag abends trainieren.', choices:[
+    { text:'⚽ Du schreibst einen Brief an den Vorstand und schlägst faire Rotation vor', points:4, feedback:'Der Vorstand diskutiert deinen Vorschlag. Ab nächster Saison werden die Zeiten rotiert!', level:'good' },
+    { text:'💬 Du sprichst das beim nächsten Training an', points:2, feedback:'Einige stimmen dir zu, andere brauchen noch Überzeugungsarbeit.', level:'ok' },
+    { text:'🤷 War halt schon immer so', points:-1, feedback:'„Schon immer so" heißt nicht „richtig so". Veränderung beginnt mit einer Frage.', level:'bad' }
+  ]},
+  { title:'Der stille Hilferuf', story:'Dein Freund postet immer düsterere Stories auf Instagram. Du machst dir Sorgen, ob es ihm gut geht.', choices:[
+    { text:'☎️ Du rufst ihn an, hörst zu und schlägst vor, gemeinsam eine Beratungsstelle zu kontaktieren', points:4, feedback:'Er bricht in Tränen aus – er wollte schon lange reden. Dein Anruf war genau richtig.', level:'good' },
+    { text:'💬 Du schreibst ihm eine nette Nachricht', points:2, feedback:'Er antwortet mit „alles gut" – aber er weiß jetzt, dass jemand hinschaut.', level:'ok' },
+    { text:'📱 Jeder postet mal düstere Sachen, das ist normal', points:-1, feedback:'Manchmal sind düstere Posts ein versteckter Hilferuf. Lieber einmal zu viel nachfragen.', level:'bad' }
+  ]},
+  { title:'Behinderung und Barrierefreiheit', story:'Eine Mitschülerin im Rollstuhl kann nicht am Schulausflug teilnehmen, weil das Ziel nicht barrierefrei ist.', choices:[
+    { text:'♿ Du schlägst ein barrierefreies Alternativziel vor und organisierst die Umplanung', points:4, feedback:'Der Ausflug geht ins barrierefreie Museum – und alle haben mehr Spaß als geplant!', level:'good' },
+    { text:'💬 Du sagst dem Lehrer, dass das unfair ist', points:2, feedback:'Der Lehrer verspricht, es nächstes Mal besser zu planen.', level:'ok' },
+    { text:'😕 Schade für sie, aber die Mehrheit hat abgestimmt', points:-1, feedback:'Inklusion heißt, dass ALLE teilnehmen können – nicht nur die Mehrheit.', level:'bad' }
+  ]},
+  { title:'Gerüchte auf dem Schulhof', story:'Jemand verbreitet ein Gerücht über eine Mitschülerin. Du weißt, dass es nicht stimmt.', choices:[
+    { text:'🛡️ Du stellst das Gerücht richtig – öffentlich und klar', points:4, feedback:'Das Gerücht stirbt sofort. Die Mitschülerin ist dir unendlich dankbar.', level:'good' },
+    { text:'🤫 Du sagst deinen engsten Freunden, dass es nicht stimmt', points:2, feedback:'Immerhin verbreiten deine Freunde es nicht weiter.', level:'ok' },
+    { text:'👂 Du hörst zu, aber sagst nichts – willst keinen Stress', points:-1, feedback:'Schweigen kann genauso verletzend sein wie Mitmachen. Haltung zeigen zählt.', level:'bad' }
+  ]},
+  { title:'Essensspende oder Wegwerfen?', story:'Deine Schule veranstaltet ein großes Sommerfest. Danach sind Berge von Essen übrig.', choices:[
+    { text:'🍽️ Du organisierst, dass die Reste an die lokale Tafel gespendet werden', points:4, feedback:'Die Tafel freut sich riesig! 50 Portionen erreichen Menschen, die sie brauchen.', level:'good' },
+    { text:'📦 Du packst Essen ein und verteilst es an Nachbarn', points:2, feedback:'Nette Geste! Fünf Nachbarn freuen sich über unerwartetes Abendessen.', level:'ok' },
+    { text:'🗑️ Ab in den Müll – ist ja vom Fest übrig', points:-1, feedback:'In Deutschland werden pro Person 75 Kilo Lebensmittel pro Jahr weggeworfen. Jede Portion zählt.', level:'bad' }
+  ]},
+  { title:'Der vergessene Geburtstag', story:'Du merkst, dass ein Mitschüler, der wenig Freunde hat, morgen Geburtstag hat. Niemand plant etwas.', choices:[
+    { text:'🎂 Du organisierst spontan eine kleine Überraschung mit Kuchen und Karte', points:4, feedback:'Er ist sprachlos vor Freude. Dieser Geburtstag wird er nie vergessen!', level:'good' },
+    { text:'🎉 Du gratulierst ihm morgen persönlich', points:2, feedback:'Er freut sich – manchmal reichen einfache Worte.', level:'ok' },
+    { text:'📅 Ist ja nicht dein bester Freund – egal', points:-1, feedback:'Gerade Menschen, die wenig Aufmerksamkeit bekommen, freuen sich am meisten darüber.', level:'bad' }
+  ]},
+  { title:'Vorurteile beim Praktikum', story:'Bei der Praktikumssuche erzählt dir ein Freund, dass er wegen seines Namens nie Antworten bekommt.', choices:[
+    { text:'📝 Du hilfst ihm mit Bewerbungen und sprichst das Thema offen im Unterricht an', points:4, feedback:'Die Klasse diskutiert über Diskriminierung. Zwei Lehrer vermitteln Praktikumsplätze.', level:'good' },
+    { text:'💪 Du ermutigst ihn, es weiter zu versuchen', points:1, feedback:'Nett, aber das eigentliche Problem bleibt bestehen.', level:'ok' },
+    { text:'🤷 Liegt bestimmt an seiner Bewerbung', points:-2, feedback:'Studien zeigen: Bei identischen Bewerbungen bekommen Menschen mit „fremd klingenden" Namen 24% weniger Antworten.', level:'bad' }
+  ]},
+  { title:'Oma braucht Hilfe mit dem Handy', story:'Deine Oma möchte Videoanrufe mit der Familie machen, versteht aber ihr neues Smartphone nicht.', choices:[
+    { text:'📱 Du nimmst dir einen Nachmittag Zeit und erstellst ihr eine bebilderte Anleitung', points:4, feedback:'Oma videotelefoniert jetzt täglich mit der Familie! Sie fühlt sich viel weniger einsam.', level:'good' },
+    { text:'📞 Du zeigst ihr schnell das Wichtigste', points:2, feedback:'Sie versteht die Basics, vergisst aber einiges wieder. Vielleicht nochmal nachhelfen?', level:'ok' },
+    { text:'😤 Das hat man dir doch schon dreimal erklärt!', points:-2, feedback:'Geduld ist eine Superkraft. Nicht jeder ist mit Technik aufgewachsen.', level:'bad' }
+  ]},
+  { title:'Sprachbarriere im Bus', story:'Im Bus versucht eine ältere Frau, dem Busfahrer ihr Ziel zu erklären – sie spricht nur gebrochen Deutsch.', choices:[
+    { text:'🗣️ Du bietest an zu übersetzen und hilfst ihr, den richtigen Bus zu finden', points:4, feedback:'Sie umarmt dich vor Dankbarkeit. Manchmal sind 2 Minuten Hilfe alles, was es braucht.', level:'good' },
+    { text:'🗺️ Du zeigst ihr auf deinem Handy die Route', points:2, feedback:'Sie nickt dankbar – Bilder helfen über Sprachbarrieren hinweg.', level:'ok' },
+    { text:'🎧 Du hast Kopfhörer drin und kriegst nichts mit', points:-1, feedback:'Aufmerksamkeit für andere ist der erste Schritt zu einer besseren Gesellschaft.', level:'bad' }
+  ]},
+  { title:'Menstruationsarmut', story:'Eine Freundin erzählt dir heimlich, dass sie sich Periodenprodukte nicht leisten kann und deshalb manchmal zu Hause bleibt.', choices:[
+    { text:'🏫 Du startest eine Initiative für kostenlose Periodenprodukte an der Schule', points:4, feedback:'Die Schulleitung stimmt zu! Automaten werden auf den Mädchentoiletten installiert.', level:'good' },
+    { text:'🤝 Du teilst unauffällig deine eigenen Vorräte mit ihr', points:2, feedback:'Sie ist erleichtert. Eine sofortige Lösung, die hilft.', level:'ok' },
+    { text:'😳 Unangenehmes Thema – du wechselst schnell das Thema', points:-1, feedback:'Perioden sind natürlich. Darüber zu schweigen verstärkt nur das Stigma.', level:'bad' }
+  ]},
+  { title:'Lernschwäche und Hänseleien', story:'Ein Mitschüler mit Legasthenie wird ausgelacht, weil er laut vorlesen muss und Fehler macht.', choices:[
+    { text:'📖 Du bietest an, gemeinsam laut vorzulesen und erklärst der Klasse, was Legasthenie ist', points:4, feedback:'Die Klasse versteht und das Auslachen hört auf. Er liest jetzt mit mehr Selbstvertrauen.', level:'good' },
+    { text:'🤫 Du sagst den Lachenden, sie sollen aufhören', points:2, feedback:'Die Lacher verstummen zumindest für heute.', level:'ok' },
+    { text:'😂 Du lachst leise mit – es klang halt wirklich lustig', points:-2, feedback:'Lernunterschiede sind kein Grund für Spott. Jeder hat Stärken und Schwächen.', level:'bad' }
+  ]},
+  { title:'LGBTQ+ Feindlichkeit', story:'Ein Mitschüler wird ausgeschlossen, nachdem er sich als schwul geoutet hat. Manche reden hinter seinem Rücken.', choices:[
+    { text:'🏳️‍🌈 Du setzt dich sichtbar neben ihn, lädst ihn ein und sprichst das Thema in der Klasse an', points:4, feedback:'Dein Mut verändert die Stimmung. Mehrere Mitschüler zeigen offen Solidarität.', level:'good' },
+    { text:'💬 Du schreibst ihm privat, dass du ihn unterstützt', points:2, feedback:'Er weiß, dass er nicht allein ist. Private Unterstützung zählt auch.', level:'ok' },
+    { text:'🙄 Soll er halt nicht so auffallen', points:-2, feedback:'Niemand sollte sich verstecken müssen. Akzeptanz beginnt bei jedem Einzelnen.', level:'bad' }
+  ]},
+  { title:'Ehrenamtliche Nachhilfe', story:'An deiner Schule gibt es Jüngere, die sich keine Nachhilfe leisten können und in Mathe abfallen.', choices:[
+    { text:'📐 Du startest eine kostenlose Nachhilfe-AG mit älteren Schülern', points:4, feedback:'12 Schüler verbessern ihre Noten! Zwei bestehen Prüfungen, die sie sonst nicht geschafft hätten.', level:'good' },
+    { text:'📝 Du hilfst einem jüngeren Schüler regelmäßig bei Mathe', points:2, feedback:'Seine Noten verbessern sich von 5 auf 3. Persönlicher Einsatz wirkt!', level:'ok' },
+    { text:'🏫 Dafür gibt es doch Lehrer', points:-1, feedback:'Lehrer können nicht jeden individuell fördern. Peer-Hilfe macht einen riesigen Unterschied.', level:'bad' }
+  ]},
+  { title:'Obdachloser vor dem Supermarkt', story:'Vor dem Supermarkt sitzt bei Kälte ein obdachloser Mann. Die meisten gehen vorbei, ohne hinzuschauen.', choices:[
+    { text:'☕ Du kaufst ihm etwas Warmes zu essen und fragst, ob er Hilfe braucht', points:4, feedback:'Er erzählt, dass er seit Wochen nicht mehr angesprochen wurde. Deine Menschlichkeit gibt ihm Hoffnung.', level:'good' },
+    { text:'👋 Du grüßt ihn freundlich', points:1, feedback:'Ein kleines Zeichen der Anerkennung. Auch Sichtbarkeit hilft.', level:'ok' },
+    { text:'🚶 Weggucken – der ist bestimmt selbst schuld', points:-2, feedback:'Obdachlosigkeit kann jeden treffen. Krankheit, Jobverlust, Scheidung – die Gründe sind vielfältig.', level:'bad' }
+  ]}
+],
+
+community: [
+  { title:'Das verlassene Grundstück', story:'In deiner Nachbarschaft gibt es ein brachliegendes Grundstück voller Unkraut und Müll.', choices:[
+    { text:'🌿 Du gründest eine Nachbarschaftsinitiative für einen Gemeinschaftsgarten', points:4, feedback:'Innerhalb von 3 Monaten entsteht ein blühender Garten! Die Nachbarn kommen zusammen wie nie zuvor.', level:'good' },
+    { text:'🧹 Du räumst mit ein paar Freunden den Müll weg', points:2, feedback:'Sieht schon viel besser aus! Jetzt fehlt noch eine Idee, was daraus werden soll.', level:'ok' },
+    { text:'🙄 Soll die Stadt sich drum kümmern', points:0, feedback:'Die Stadt hat andere Prioritäten. Manchmal muss Initiative von unten kommen.', level:'bad' }
+  ]},
+  { title:'Einsame Senioren', story:'Im Altenheim um die Ecke bekommen viele Bewohner kaum noch Besuch. Die Einsamkeit macht sie traurig.', choices:[
+    { text:'🎮 Du startest einen wöchentlichen Besuchsdienst mit Gaming- und Geschichten-Nachmittag', points:4, feedback:'Die Senioren lieben es! Oma Hilde ist jetzt Candy-Crush-Champion.', level:'good' },
+    { text:'✉️ Du schreibst ein paar Briefe und malst Bilder', points:2, feedback:'Die Briefe hängen stolz an der Pinnwand.', level:'ok' },
+    { text:'📵 Alte Leute sind langweilig', points:-1, feedback:'Jeder Mensch hat eine Geschichte. Und eines Tages freust auch du dich über Besuch.', level:'bad' }
+  ]},
+  { title:'Schulküche – Essen für alle?', story:'Einige Mitschüler können sich das Mittagessen nicht leisten und essen nichts.', choices:[
+    { text:'🍽️ Du organisierst einen anonymen Solidaritätsfonds mit der Schulleitung', points:4, feedback:'Niemand muss mehr hungrig lernen! Der Fonds wird von Eltern und Lehrern unterstützt.', level:'good' },
+    { text:'🥪 Du teilst dein Essen mit deinem Sitznachbarn', points:2, feedback:'Herzlich! Aber das Problem betrifft mehr als eine Person.', level:'ok' },
+    { text:'🤐 Peinliches Thema – sagst lieber nichts', points:-1, feedback:'Schweigen ändert nichts. Armut ist kein Grund für Scham.', level:'bad' }
+  ]},
+  { title:'Vandalismus an der Bushaltestelle', story:'Die Bushaltestelle in deinem Viertel ist komplett zerstört – eingeschlagene Scheiben, Graffiti, kein Sitzplatz.', choices:[
+    { text:'🎨 Du organisierst ein Verschönerungsprojekt mit legaler Street-Art und neuen Bänken', points:4, feedback:'Die Haltestelle wird zum Highlight! Vandalismus geht zurück, weil alle stolz auf „ihre" Haltestelle sind.', level:'good' },
+    { text:'📞 Du meldest den Schaden der Stadtverwaltung', points:2, feedback:'In 3 Wochen wird repariert. Gut, dass jemand Bescheid sagt!', level:'ok' },
+    { text:'🤷 Ist halt eine Bushaltestelle – wen kümmerts?', points:-1, feedback:'Öffentliche Orte gehören allen. Wenn niemand sich kümmert, verkommen sie.', level:'bad' }
+  ]},
+  { title:'Nachbarschaftsstreit eskaliert', story:'Zwei Nachbarn streiten lautstark über die Hecke zwischen ihren Grundstücken. Die ganze Straße ist genervt.', choices:[
+    { text:'🕊️ Du schlägst ein Nachbarschaftstreffen vor, bei dem alle Wünsche besprochen werden', points:4, feedback:'Beim Treffen einigt man sich auf einen Kompromiss. Bonus: Es entsteht ein regelmäßiger Stammtisch!', level:'good' },
+    { text:'💬 Du sprichst einzeln mit beiden und versuchst zu vermitteln', points:2, feedback:'Beide hören dir zu. Die Lautstärke geht immerhin zurück.', level:'ok' },
+    { text:'😤 Sollen die doch ihren Kram allein regeln', points:-1, feedback:'Nachbarschaftskonflikte vergiften das Klima für alle. Vermittlung hilft.', level:'bad' }
+  ]},
+  { title:'Die geschlossene Jugendtreff', story:'Der einzige Jugendtreff im Viertel soll wegen Geldmangels geschlossen werden.', choices:[
+    { text:'📢 Du startest eine Kampagne, sammelst Spenden und sprichst mit dem Bürgermeister', points:4, feedback:'Der Treff bleibt offen! Eine lokale Firma übernimmt die Patenschaft.', level:'good' },
+    { text:'📝 Du unterschreibst die Petition zur Rettung', points:2, feedback:'1.500 Unterschriften kommen zusammen. Es gibt Hoffnung.', level:'ok' },
+    { text:'🏠 Du hängst eh lieber zu Hause rum', points:-1, feedback:'Für viele Jugendliche ist der Treff der einzige sichere Ort. Nicht jeder hat ein eigenes Zimmer.', level:'bad' }
+  ]},
+  { title:'Spielplatz für alle Altersgruppen', story:'Der Spielplatz in deinem Viertel hat nur Geräte für kleine Kinder. Jugendliche haben keinen Platz.', choices:[
+    { text:'📐 Du entwirfst einen Vorschlag für eine Chill-Ecke und Sportgeräte und präsentierst ihn der Gemeinde', points:4, feedback:'Die Gemeinde genehmigt das Budget! Im Herbst werden Klettergerüste und eine Sitzecke gebaut.', level:'good' },
+    { text:'💬 Du beschwerst dich bei deinen Eltern und bittest sie, etwas zu tun', points:1, feedback:'Deine Eltern sprechen es beim nächsten Elternabend an. Kleine Wellen.', level:'ok' },
+    { text:'🏃 Dann hängt man halt auf der Straße rum', points:-1, feedback:'Jugendliche brauchen öffentliche Räume. Nur Beschweren ändert nichts – aber Vorschläge schon.', level:'bad' }
+  ]},
+  { title:'Hochwasser in der Region', story:'Ein nahegelegenes Dorf wurde überflutet. Viele Familien haben alles verloren.', choices:[
+    { text:'🚛 Du organisierst eine Sachspendenaktion an der Schule und fährst mit zum Helfen', points:4, feedback:'Drei Transporter voller Spenden! Deine Hilfe vor Ort gibt den Familien neuen Mut.', level:'good' },
+    { text:'💰 Du spendest Geld an eine Hilfsorganisation', points:2, feedback:'Jeder Euro hilft – Spenden werden gezielt eingesetzt.', level:'ok' },
+    { text:'📺 Traurig, aber was soll ich schon tun?', points:-1, feedback:'Mehr als du denkst! Jede helfende Hand zählt bei Katastrophen.', level:'bad' }
+  ]},
+  { title:'Bücherschrank für die Nachbarschaft', story:'In deinem Viertel gibt es weder Bibliothek noch Buchhandlung. Viele Kinder haben kaum Zugang zu Büchern.', choices:[
+    { text:'📚 Du baust mit Freunden einen öffentlichen Bücherschrank und sammelst gespendete Bücher', points:4, feedback:'Der Bücherschrank wird zum Treffpunkt! 200 Bücher rotieren – Lesen wird zum Nachbarschaftshobby.', level:'good' },
+    { text:'📖 Du spendest deine alten Bücher an eine Sammelstelle', points:2, feedback:'30 Bücher finden neue Leser. Ein schöner Kreislauf.', level:'ok' },
+    { text:'📱 Wer liest denn noch Bücher?', points:-1, feedback:'Lesen fördert Empathie, Wortschatz und Vorstellungskraft. Nicht jeder hat Internet.', level:'bad' }
+  ]},
+  { title:'Straßenfest organisieren', story:'In deiner Straße kennen sich die Nachbarn kaum. Jeder bleibt für sich.', choices:[
+    { text:'🎊 Du organisierst ein multikulturelles Straßenfest mit Musik und Essen', points:4, feedback:'Über 80 Nachbarn kommen! Drei neue Freundschaften entstehen und eine WhatsApp-Gruppe für Nachbarschaftshilfe.', level:'good' },
+    { text:'👋 Du klingelst bei den Nachbarn und stellst dich vor', points:2, feedback:'Nette Gespräche an der Tür! Kleine Schritte Richtung Gemeinschaft.', level:'ok' },
+    { text:'🔒 Geht mich nichts an, wer nebenan wohnt', points:-1, feedback:'Starke Nachbarschaften machen Viertel sicherer und lebenswerter.', level:'bad' }
+  ]},
+  { title:'Flüchtlingsunterkunft in der Nähe', story:'In deinem Viertel wird eine Flüchtlingsunterkunft eröffnet. Manche Nachbarn reagieren ablehnend.', choices:[
+    { text:'🤝 Du startest einen Willkommenstreff mit Deutschkurs und gemeinsamen Aktivitäten', points:4, feedback:'Die Bewohner fühlen sich willkommen. Kinder spielen zusammen, Vorurteile schmelzen.', level:'good' },
+    { text:'💬 Du sprichst mit ablehnenden Nachbarn und versuchst Ängste zu nehmen', points:2, feedback:'Einige hören zu. Gespräche sind der erste Schritt gegen Vorurteile.', level:'ok' },
+    { text:'😠 Die sollen woanders hin!', points:-2, feedback:'Menschen, die vor Krieg fliehen, suchen Sicherheit – nicht Ablehnung. Mitgefühl ist eine Stärke.', level:'bad' }
+  ]},
+  { title:'Lokale Geschäfte sterben', story:'Immer mehr kleine Läden in deiner Straße schließen. Nur noch Ketten und Leerstand.', choices:[
+    { text:'🛍️ Du startest eine „Kauf lokal"-Kampagne mit Flyern und Social Media', points:4, feedback:'Umsätze steigen um 20%! Zwei Läden, die fast schließen mussten, bleiben offen.', level:'good' },
+    { text:'🏪 Du kaufst selbst bewusst bei lokalen Geschäften ein', points:2, feedback:'Jeder Einkauf ist eine Stimme für dein Viertel.', level:'ok' },
+    { text:'📦 Online ist halt bequemer und billiger', points:-1, feedback:'Wenn lokale Geschäfte sterben, sterben auch Treffpunkte, Arbeitsplätze und Vielfalt.', level:'bad' }
+  ]},
+  { title:'Parkbank-Politik', story:'Die einzige Parkbank im Viertel ist kaputt. Ältere Menschen haben keinen Platz zum Ausruhen.', choices:[
+    { text:'🪑 Du sammelst Geld für eine neue Bank und organisierst die Aufstellung mit der Gemeinde', points:4, feedback:'Die neue Bank wird zum beliebtesten Treffpunkt! Eine Plakette dankt der „Jugendinitiative".', level:'good' },
+    { text:'📧 Du meldest den Schaden der Gemeinde online', points:2, feedback:'In 4 Wochen wird repariert. Bürokratie braucht Geduld.', level:'ok' },
+    { text:'🤷 Ist ja nur eine Bank', points:-1, feedback:'Für jemanden, der schlecht laufen kann, ist eine Parkbank kein Luxus – sondern Teilhabe.', level:'bad' }
+  ]},
+  { title:'Lärm vs. Lebensqualität', story:'Jugendliche aus der Nachbarschaft spielen abends laut Musik im Park. Anwohner beschweren sich.', choices:[
+    { text:'🎵 Du vermittelst: feste Zeiten für Musik und ein gemeinsames Sommerfest', points:4, feedback:'Kompromiss gefunden! Der Park wird zum gemeinsamen Wohnzimmer – mit Ruhezeiten.', level:'good' },
+    { text:'🔊 Du schlägst den Jugendlichen vor, Kopfhörer zu nutzen', points:2, feedback:'Manche machen mit. Nicht perfekt, aber besser.', level:'ok' },
+    { text:'🎸 Sollen die Alten halt Ohrstöpsel benutzen', points:-1, feedback:'Rücksicht ist keine Einschränkung, sondern Respekt. Kompromisse stärken Gemeinschaften.', level:'bad' }
+  ]},
+  { title:'Dunkelheit auf dem Schulweg', story:'Der Weg zur Schule ist im Winter stockfinster. Jüngere Schüler fühlen sich unsicher.', choices:[
+    { text:'🔦 Du sammelst Unterschriften für Straßenbeleuchtung und sprichst im Gemeinderat', points:4, feedback:'Drei neue Laternen werden installiert! Der Schulweg ist jetzt sicher und hell.', level:'good' },
+    { text:'🚶 Du begleitest jüngere Schüler auf dem dunklen Weg', points:2, feedback:'Solidarität! Die Kleinen fühlen sich sicherer mit den Großen.', level:'ok' },
+    { text:'🌙 Ist halt Winter, wird halt früh dunkel', points:-1, feedback:'Sicherheit auf dem Schulweg ist ein Grundrecht. Kinder sollen sich nicht fürchten müssen.', level:'bad' }
+  ]}
+],
+
+digital: [
+  { title:'Fake News auf Instagram', story:'Ein viraler Post behauptet, 5G-Masten verursachen Krankheiten. Deine Tante hat ihn 50 Mal geteilt.', choices:[
+    { text:'🔍 Du recherchierst gründlich und erstellst einen verständlichen Faktencheck-Post', points:4, feedback:'Dein Post wird mehr geteilt als das Original! Mehrere Leute bedanken sich für die Aufklärung.', level:'good' },
+    { text:'💬 Du schreibst deiner Tante privat, dass das nicht stimmt', points:2, feedback:'Sie ist skeptisch, aber hört dir zu.', level:'ok' },
+    { text:'👍 Du gibst dem Post ein Like – klingt irgendwie logisch', points:-2, feedback:'Vorsicht! Ohne Faktencheck verbreitest du Fehlinformationen weiter.', level:'bad' }
+  ]},
+  { title:'Die Petitions-App', story:'Du entdeckst eine App, mit der man lokale Petitionen starten kann. Deine Stadt braucht bessere Radwege.', choices:[
+    { text:'📱 Du startest eine Petition mit Fotos, Daten und klarer Forderung', points:4, feedback:'2.000 Unterschriften in einer Woche! Der Bürgermeister lädt dich zum Gespräch ein.', level:'good' },
+    { text:'✍️ Du unterschreibst bestehende Petitionen und teilst sie', points:2, feedback:'Jede Stimme zählt! Du bist Teil einer wachsenden Bewegung.', level:'ok' },
+    { text:'📵 Petitionen bringen doch eh nichts', points:-1, feedback:'In deiner Stadt wurden durch Petitionen schon 3 Projekte umgesetzt.', level:'bad' }
+  ]},
+  { title:'KI-Hausaufgaben', story:'Dein Freund nutzt ChatGPT, um alle Hausaufgaben zu erledigen, ohne selbst nachzudenken.', choices:[
+    { text:'🧠 Du zeigst ihm, wie man KI als Lernwerkzeug nutzt statt als Copy-Paste-Maschine', points:4, feedback:'Er versteht den Unterschied! Jetzt nutzt er KI, um Konzepte zu verstehen.', level:'good' },
+    { text:'💬 Du sagst ihm, dass er davon nichts lernt', points:2, feedback:'Er rollt die Augen, aber denkt beim nächsten Mal vielleicht drüber nach.', level:'ok' },
+    { text:'🤖 Du machst es genauso – warum nicht?', points:-1, feedback:'Bei der Prüfung hilft dir keine KI. Echtes Wissen kommt durchs Verstehen.', level:'bad' }
+  ]},
+  { title:'Datenschutz? Egal?', story:'Eine coole neue App will Zugriff auf deine Kontakte, Kamera, Mikrofon und Standort – für ein Quizspiel.', choices:[
+    { text:'🛡️ Du lehnst ab, recherchierst die Firma und warnst Freunde vor den Datenschutzrisiken', points:4, feedback:'Die App entpuppt sich als Datenkrake! Dank dir installieren es weniger Leute.', level:'good' },
+    { text:'⚙️ Du installierst die App, schränkst aber die Berechtigungen ein', points:2, feedback:'Smarter Umgang mit Berechtigungen – immerhin!', level:'ok' },
+    { text:'✅ Ja zu allem – willst endlich spielen', points:-2, feedback:'Deine Daten sind jetzt in fremden Händen. Ein Quizspiel braucht kein Mikrofon!', level:'bad' }
+  ]},
+  { title:'Hate-Kommentare unter einem Video', story:'Unter dem YouTube-Video einer jungen Klimaaktivistin häufen sich Hasskommentare und Drohungen.', choices:[
+    { text:'💪 Du meldest die Kommentare, schreibst Unterstützung und teilst das Video positiv', points:4, feedback:'Die Hasskommentare werden gelöscht. Das Video bekommt 10.000 neue positive Klicks!', level:'good' },
+    { text:'❤️ Du hinterlässt einen unterstützenden Kommentar', points:2, feedback:'In einem Meer von Hass ist ein freundliches Wort Gold wert.', level:'ok' },
+    { text:'📺 Du scrollst weiter – typisches Internet halt', points:-1, feedback:'Wenn niemand Hass widerspricht, sieht es aus, als hätten die Hater recht.', level:'bad' }
+  ]},
+  { title:'Digitale Sucht beim kleinen Bruder', story:'Dein kleiner Bruder (10) sitzt 6 Stunden am Tag am Tablet. Er schläft schlecht und ist reizbar.', choices:[
+    { text:'🎯 Du schlägst Familienregeln vor und organisierst coole Offline-Alternativen', points:4, feedback:'Mit Brettspielabend und Fußball im Park verbringt er jetzt nur noch 2 Stunden am Tablet.', level:'good' },
+    { text:'⏰ Du stellst ihm einen Timer am Tablet ein', points:2, feedback:'Er protestiert, aber schläft besser. Struktur hilft!', level:'ok' },
+    { text:'📱 Du bist doch selbst den ganzen Tag am Handy', points:-1, feedback:'Guter Punkt – aber gerade deshalb weißt du ja, wie schnell es einen reinzieht. Hilf ihm!', level:'bad' }
+  ]},
+  { title:'Deepfake-Alarm', story:'Jemand hat mit KI ein Deepfake-Video von einer Lehrerin erstellt und es verbreitet sich in der Schule.', choices:[
+    { text:'🚨 Du meldest es sofort der Schulleitung und klärst Mitschüler über Deepfakes auf', points:4, feedback:'Das Video wird gelöscht, der Ersteller ermittelt. Deine Aufklärung verhindert Nachahmung.', level:'good' },
+    { text:'❌ Du leitest das Video nicht weiter und sagst anderen, es zu löschen', points:2, feedback:'Richtig – jedes Weiterleiten macht es schlimmer.', level:'ok' },
+    { text:'😂 Sieht echt lustig aus – du teilst es im Gruppenchat', points:-3, feedback:'Deepfakes können Existenzen zerstören. Weiterleiten ist Mittäterschaft.', level:'bad' }
+  ]},
+  { title:'Open Source für die Schule', story:'Eure Schule zahlt tausende Euro für Software-Lizenzen. Du weißt, dass es kostenlose Open-Source-Alternativen gibt.', choices:[
+    { text:'💻 Du erstellst eine Vergleichsliste und präsentierst sie der IT-Abteilung', points:4, feedback:'Die Schule spart 5.000 Euro pro Jahr! Das Geld fließt in neue Tablets.', level:'good' },
+    { text:'🖥️ Du nutzt selbst Open-Source-Software und empfiehlst sie Freunden', points:2, feedback:'Drei Mitschüler steigen um. Stück für Stück!', level:'ok' },
+    { text:'💸 Ist ja nicht dein Geld', points:-1, feedback:'Öffentliches Geld ist unser aller Geld. Effizienz kommt allen zugute.', level:'bad' }
+  ]},
+  { title:'Online-Betrug bei Oma', story:'Deine Oma zeigt dir eine E-Mail: Sie hat angeblich 100.000 Euro gewonnen und soll ihre Bankdaten eingeben.', choices:[
+    { text:'🛡️ Du erklärst ihr den Betrug und richtest zusammen einen Spam-Filter ein', points:4, feedback:'Oma ist geschützt! Sie erzählt es ihren Freundinnen im Seniorentreff – 10 Betrugsversuche werden erkannt.', level:'good' },
+    { text:'❌ Du löschst die Mail und sagst ihr, dass es Betrug ist', points:2, feedback:'Gut, aber ohne Erklärung fällt sie vielleicht beim nächsten Mal drauf rein.', level:'ok' },
+    { text:'🤔 Vielleicht ist es ja echt? Man weiß nie', points:-2, feedback:'Das ist IMMER Betrug. Solche Scams kosten Senioren in Deutschland Millionen pro Jahr.', level:'bad' }
+  ]},
+  { title:'Algorithmen und Filterblasen', story:'Du merkst, dass dein Social-Media-Feed nur noch extreme Meinungen zeigt – von beiden Seiten.', choices:[
+    { text:'🔄 Du folgst bewusst diversen Quellen und erstellst einen Guide für Medienkompetenz', points:4, feedback:'Dein Guide wird an der Schule verwendet! Mehrere Schüler diversifizieren ihre Feeds.', level:'good' },
+    { text:'📰 Du folgst ein paar zusätzlichen, sachlichen Nachrichtenquellen', points:2, feedback:'Dein Feed wird ausgewogener. Guter erster Schritt!', level:'ok' },
+    { text:'📱 Ist mir egal, ich scroll nur durch', points:-1, feedback:'Filterblasen polarisieren. Wer nur eine Seite hört, versteht die Welt nicht.', level:'bad' }
+  ]},
+  { title:'Gaming und Respekt', story:'Im Online-Spiel wird ein Mitspieler rassistisch beleidigt. Alle im Voice-Chat hören es.', choices:[
+    { text:'🎮 Du sagst klar Stopp, meldest den Spieler und unterstützt den Betroffenen', points:4, feedback:'Der Troll wird gebannt. Der betroffene Spieler bedankt sich – endlich sagt mal jemand was!', level:'good' },
+    { text:'🔇 Du mutest den Troll und spielst weiter', points:1, feedback:'Für dich gelöst, aber der Betroffene hört es weiterhin.', level:'ok' },
+    { text:'🎤 Ist halt Gaming-Kultur, nicht so ernst nehmen', points:-2, feedback:'Rassismus ist keine „Kultur" – weder online noch offline.', level:'bad' }
+  ]},
+  { title:'Coding für den guten Zweck', story:'Du kannst ein bisschen programmieren. Ein lokaler Verein sucht verzweifelt eine einfache Website.', choices:[
+    { text:'💻 Du baust ihnen eine Website ehrenamtlich und bringst einem Vereinsmitglied bei, sie zu pflegen', points:4, feedback:'Der Verein verdreifacht seine Mitgliederzahlen dank Online-Präsenz!', level:'good' },
+    { text:'📧 Du empfiehlst ihnen einen kostenlosen Homepage-Baukasten', points:2, feedback:'Hilft ihnen weiter – auch wenn sie technisch kämpfen.', level:'ok' },
+    { text:'💰 Webdesign kostet Geld – sollen die jemanden beauftragen', points:-1, feedback:'Kleine Vereine haben oft kein Budget. Dein Wissen kann Großes bewirken.', level:'bad' }
+  ]},
+  { title:'Digitale Barrierefreiheit', story:'Die neue Schul-Website ist für sehbehinderte Schüler nicht nutzbar – keine Screenreader-Unterstützung.', choices:[
+    { text:'♿ Du testest die Seite auf Barrierefreiheit und gibst der IT konkrete Verbesserungsvorschläge', points:4, feedback:'Die Website wird überarbeitet. Alle Schüler können sie jetzt nutzen!', level:'good' },
+    { text:'📝 Du meldest das Problem der Schulleitung', points:2, feedback:'Es landet auf der To-Do-Liste. Fortschritt braucht Nachdruck.', level:'ok' },
+    { text:'👁️ Betrifft ja nur wenige Schüler', points:-1, feedback:'Barrierefreiheit ist ein Recht, kein Bonus. 7,8 Millionen Schwerbehinderte leben in Deutschland.', level:'bad' }
+  ]},
+  { title:'TikTok-Challenge: gefährlich!', story:'Eine neue Challenge auf TikTok ist gefährlich – Kinder verletzen sich. Dein kleiner Cousin will mitmachen.', choices:[
+    { text:'🎬 Du erklärst ihm die Gefahr und dreht mit ihm ein Video, das vor der Challenge warnt', points:4, feedback:'Euer Warnvideo geht viral! Hunderte Kinder überlegen es sich anders.', level:'good' },
+    { text:'⚠️ Du verbietest es ihm und erklärst, warum es gefährlich ist', points:2, feedback:'Er schmollt, aber bleibt unverletzt. Manchmal muss man unpopulär sein.', level:'ok' },
+    { text:'📱 Ist bestimmt nicht so schlimm, die übertreiben alle', points:-2, feedback:'Jedes Jahr landen hunderte Kinder wegen gefährlicher Challenges im Krankenhaus.', level:'bad' }
+  ]},
+  { title:'Passwort-Katastrophe', story:'Deine Freundin nutzt für ALLES dasselbe Passwort: „passwort123". Ihr Social-Media-Account wurde bereits gehackt.', choices:[
+    { text:'🔐 Du hilfst ihr, einen Passwort-Manager einzurichten und erklärt 2-Faktor-Authentifizierung', points:4, feedback:'Alle Accounts sind jetzt sicher! Sie gibt das Wissen an ihre Familie weiter.', level:'good' },
+    { text:'⚠️ Du sagst ihr, sie soll ihr Passwort ändern', points:2, feedback:'Sie ändert es zu „passwort456"... besser als nichts?', level:'ok' },
+    { text:'🤷 Wer hackt schon normale Leute?', points:-1, feedback:'Deutschland hat Millionen Cybercrime-Opfer pro Jahr. Jeder kann betroffen sein.', level:'bad' }
+  ]}
+],
+
+event: [
+  { title:'🌟 Zeitungsinterview', story:'Die lokale Zeitung sucht junge Changemaker! Du wirst vorgeschlagen.', choices:[
+    { text:'🎤 Du nutzt die Chance und sprichst über Projekte, die Jugendliche umsetzen können', points:3, feedback:'Dein Interview inspiriert Dutzende Jugendliche in der Stadt!', level:'good' },
+    { text:'😊 Du lässt lieber jemand anderen sprechen', points:1, feedback:'Manchmal braucht die Welt deine Stimme!', level:'ok' }
+  ]},
+  { title:'⚡ Freund braucht Hilfe', story:'Ein Freund erzählt, dass er zu Hause Probleme hat und nicht weiß wohin.', choices:[
+    { text:'❤️ Du hörst zu, nimmst ihn ernst und schlägst eine Beratungsstelle vor', points:3, feedback:'Dein Freund fühlt sich gehört. Gemeinsam findet ihr professionelle Hilfe.', level:'good' },
+    { text:'💬 Du sagst „wird schon" und lenkst ab', points:0, feedback:'Manchmal brauchen Menschen mehr als Ablenkung.', level:'ok' }
+  ]},
+  { title:'🔥 Projektablehnung', story:'Dein Umweltprojekt wird von der Schulleitung abgelehnt: „Zu teuer."', choices:[
+    { text:'💪 Du überarbeitest den Plan mit günstigeren Alternativen und Sponsoren', points:3, feedback:'Hartnäckigkeit zahlt sich aus! Die neue Version wird genehmigt.', level:'good' },
+    { text:'😞 Du gibst auf – die wollen das nicht', points:-1, feedback:'Jeder Changemaker ist einmal gescheitert. Aufstehen ist der Schlüssel!', level:'bad' }
+  ]},
+  { title:'🎯 Fundstück', story:'Du findest einen 50-Euro-Schein auf dem Schulflur. Niemand sieht dich.', choices:[
+    { text:'📋 Du gibst ihn im Sekretariat ab', points:3, feedback:'Am nächsten Tag bedankt sich ein Mitschüler unter Tränen – es war sein Essensgeld.', level:'good' },
+    { text:'🍕 Finder keepers! Pizza für alle!', points:-2, feedback:'Jemand anderes geht leer aus. Ehrlichkeit baut Vertrauen auf.', level:'bad' }
+  ]},
+  { title:'🎪 Talentshow-Chance', story:'Die Schule veranstaltet eine Talentshow. Der Erlös geht an ein Kinderhilfswerk.', choices:[
+    { text:'🎵 Du trittst auf und motivierst andere mitzumachen – der Saal ist voll!', points:3, feedback:'1.200 Euro kommen zusammen! Das Hilfswerk bedankt sich offiziell.', level:'good' },
+    { text:'👏 Du kommst als Zuschauer und kaufst eine Karte', points:1, feedback:'Jede Karte zählt! Unterstützung gibt es in vielen Formen.', level:'ok' }
+  ]},
+  { title:'🏅 Ehrenamtspreis', story:'Du wirst für den Jugend-Ehrenamtspreis der Stadt nominiert!', choices:[
+    { text:'🙏 Du nimmst an und nutzt die Bühne, um für mehr Jugendengagement zu werben', points:4, feedback:'Deine Rede bewegt! 15 Jugendliche melden sich für Ehrenamt an.', level:'good' },
+    { text:'😅 Peinlich – du lehnst ab', points:0, feedback:'Schade! Vorbilder sind wichtig, um andere zu inspirieren.', level:'ok' }
+  ]},
+  { title:'💥 Shitstorm gegen dein Projekt', story:'Dein Klimaprojekt bekommt online plötzlich heftige Kritik. Trolle fluten die Kommentare.', choices:[
+    { text:'🛡️ Du bleibst sachlich, antwortest mit Fakten und holst dir Verbündete', points:3, feedback:'Die Trolle geben auf. Dein Projekt bekommt durch die Aufmerksamkeit sogar mehr Unterstützer!', level:'good' },
+    { text:'🗑️ Du löschst alles und gibst auf', points:-1, feedback:'Trolle wollen genau das. Nicht aufgeben – sondern klug antworten!', level:'bad' }
+  ]},
+  { title:'🌈 Unerwartete Unterstützung', story:'Ein lokales Unternehmen bietet an, euer Schulprojekt zu sponsern – mit 500 Euro!', choices:[
+    { text:'🤝 Du nimmst an, vereinbarst transparente Nutzung und berichtest öffentlich', points:3, feedback:'Das Geld ermöglicht drei neue Projekte! Transparenz schafft Vertrauen.', level:'good' },
+    { text:'🤔 Du bist misstrauisch und lehnst ab', points:0, feedback:'Vorsicht ist gut, aber nicht jedes Angebot hat einen Haken.', level:'ok' }
+  ]},
+  { title:'📣 Demo oder Schule?', story:'Am Freitag ist eine große Klimademo. Du hast aber eine wichtige Klausur.', choices:[
+    { text:'📝 Du schreibst die Klausur und organisierst danach eine Aktion an der Schule', points:3, feedback:'Kluger Kompromiss! Deine Schulaktion erreicht alle Mitschüler.', level:'good' },
+    { text:'🪧 Du schwänzt die Klausur für die Demo', points:0, feedback:'Engagement ist toll – aber Bildung ist auch ein Werkzeug für Veränderung.', level:'ok' }
+  ]},
+  { title:'🎁 Gewinnspiel-Glück', story:'Du gewinnst bei einem Schulwettbewerb einen 100-Euro-Gutschein!', choices:[
+    { text:'💝 Du teilst den Gewinn: die Hälfte für dich, die Hälfte für ein Schulprojekt', points:3, feedback:'Das Schulprojekt bekommt einen Boost und du hast trotzdem etwas für dich!', level:'good' },
+    { text:'🛍️ Alles für dich – du hast es verdient!', points:0, feedback:'Klar, ist dein gutes Recht. Aber Teilen hätte noch mehr Freude gebracht.', level:'ok' }
+  ]},
+  { title:'🌪️ Krisensituation in der Stadt', story:'Ein schwerer Sturm hat Bäume umgeworfen und Straßen blockiert. Die Feuerwehr ist überfordert.', choices:[
+    { text:'🧤 Du organisierst Nachbarschaftshilfe und räumst mit Freiwilligen Gehwege frei', points:4, feedback:'Eure Truppe befreit drei Straßen! Die Feuerwehr dankt euch persönlich.', level:'good' },
+    { text:'📞 Du rufst bei der Stadtverwaltung an, um Hilfe zu melden', points:1, feedback:'Die Meldung hilft bei der Koordination. Aber Anpacken wäre noch besser!', level:'ok' }
+  ]},
+  { title:'🎭 Kulturabend in Gefahr', story:'Der jährliche Kulturabend der Schule droht auszufallen – niemand hat die Organisation übernommen.', choices:[
+    { text:'🎬 Du springst ein, stellst ein Team zusammen und organisierst den Abend', points:4, feedback:'Stehende Ovationen! Der beste Kulturabend seit Jahren. Du bist der Held des Tages.', level:'good' },
+    { text:'💬 Du fragst in der Klasse, wer Lust hat mitzuhelfen', points:1, feedback:'Zwei melden sich, aber ohne Führung versandet es. Manchmal braucht es jemanden, der vorangeht.', level:'ok' }
+  ]},
+  { title:'📱 Virale Aufmerksamkeit', story:'Ein TikTok über dein Schulprojekt geht viral – 500.000 Views! Medien fragen an.', choices:[
+    { text:'📺 Du gibst Interviews und nutzt die Aufmerksamkeit für die Sache', points:4, feedback:'Drei andere Schulen starten ähnliche Projekte! Deine Reichweite wird zur Bewegung.', level:'good' },
+    { text:'😰 Dir ist die Aufmerksamkeit zu viel – du tauchst ab', points:0, feedback:'Verständlich, aber eine verpasste Chance. Öffentlichkeit kann Projekte retten.', level:'ok' }
+  ]},
+  { title:'🤝 Konkurrenz oder Kooperation?', story:'Eine andere Klasse startet ein ähnliches Projekt wie deines. Manche sagen: „Die kopieren uns!"', choices:[
+    { text:'🤝 Du schlägst eine Zusammenarbeit vor – gemeinsam seid ihr stärker', points:3, feedback:'Das fusionierte Projekt ist doppelt so wirkungsvoll! Kooperation schlägt Konkurrenz.', level:'good' },
+    { text:'😤 Du beschwerst dich bei der Lehrerin über die „Kopie"', points:-1, feedback:'Veränderung ist kein Wettbewerb. Je mehr mitmachen, desto besser!', level:'bad' }
+  ]},
+  { title:'💡 Einladung ins Rathaus', story:'Der Bürgermeister lädt Jugendliche ein, Ideen für die Stadt einzubringen.', choices:[
+    { text:'🏛️ Du gehst hin, bringst konkrete Vorschläge mit Daten und Bildern', points:4, feedback:'Zwei deiner Vorschläge werden umgesetzt! Junge Stimmen werden ernst genommen.', level:'good' },
+    { text:'🗳️ Du gehst hin und hörst zu', points:1, feedback:'Gut, dass du da warst! Aber nächstes Mal: eigene Ideen einbringen.', level:'ok' }
+  ]}
+]
+};
+
+// ============================================================
+// SMART NO-REPEAT QUESTION SYSTEM
+// ============================================================
+let questionPools = {};  // shuffled arrays per type
+let usedCounts = {};     // track how many used per type
+
+function initQuestionPools() {
+  questionPools = {};
+  usedCounts = {};
+  for (const type in SCENARIOS) {
+    questionPools[type] = shuffle([...Array(SCENARIOS[type].length).keys()]);
+    usedCounts[type] = 0;
+  }
+}
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function getNextScenario(type) {
+  if (!questionPools[type] || usedCounts[type] >= questionPools[type].length) {
+    // All questions used — reshuffle
+    questionPools[type] = shuffle([...Array(SCENARIOS[type].length).keys()]);
+    usedCounts[type] = 0;
+  }
+  const idx = questionPools[type][usedCounts[type]];
+  usedCounts[type]++;
+  return SCENARIOS[type][idx];
+}
+
+function getTotalQuestions() {
+  let total = 0;
+  for (const type in SCENARIOS) total += SCENARIOS[type].length;
+  return total;
+}
+
+function getUsedQuestions() {
+  let total = 0;
+  for (const type in usedCounts) total += usedCounts[type];
+  return total;
+}
+
+
+// ============================================================
+// GAME STATE
+// ============================================================
+const COLORS_LIST = ['#2ecc71','#3498db','#e84393','#6c5ce7'];
+
+const FIELDS = [
+  { type:'start', icon:'🏁', label:'Start' },
+  { type:'env', icon:'🌱', label:'Umwelt' },
+  { type:'social', icon:'🤝', label:'Soziales' },
+  { type:'community', icon:'🏘️', label:'Gemeinde' },
+  { type:'digital', icon:'📱', label:'Digital' },
+  { type:'event', icon:'⚡', label:'Event' },
+  { type:'env', icon:'♻️', label:'Recycling' },
+  { type:'social', icon:'💬', label:'Respekt' },
+  { type:'community', icon:'🎨', label:'Kultur' },
+  { type:'env', icon:'🚲', label:'Mobilität' },
+  { type:'digital', icon:'🛡️', label:'Sicherheit' },
+  { type:'event', icon:'🌟', label:'Chance' },
+  { type:'social', icon:'📚', label:'Bildung' },
+  { type:'community', icon:'🌳', label:'Garten' },
+  { type:'env', icon:'💧', label:'Wasser' },
+  { type:'digital', icon:'🧠', label:'KI-Ethik' },
+  { type:'social', icon:'❤️', label:'Empathie' },
+  { type:'event', icon:'🎯', label:'Spezial' },
+  { type:'community', icon:'🗳️', label:'Mitsprache' },
+  { type:'env', icon:'🐝', label:'Tierschutz' },
+  { type:'digital', icon:'📢', label:'Aktivismus' },
+  { type:'social', icon:'🏳️‍🌈', label:'Vielfalt' },
+  { type:'event', icon:'🔥', label:'Rückschlag' },
+  { type:'community', icon:'🍽️', label:'Teilen' },
+  { type:'env', icon:'☀️', label:'Energie' },
+  { type:'social', icon:'👂', label:'Zuhören' },
+  { type:'digital', icon:'💡', label:'Innovation' },
+  { type:'goal', icon:'🌍', label:'Ziel' }
+];
+
+let players = [];
+let currentPlayer = 0;
+let positions = [];
+let scores = [];
+let gameActive = false;
+
+function startGame() {
+  const names = [
+    document.getElementById('p1name').value.trim() || 'Spieler 1',
+    document.getElementById('p2name').value.trim() || 'Spieler 2',
+    document.getElementById('p3name').value.trim(),
+    document.getElementById('p4name').value.trim()
+  ].filter(n => n);
+
+  if (names.length < 2) {
+    names.length = 0;
+    names.push('Spieler 1', 'Spieler 2');
+  }
+
+  players = names.map((name, i) => ({ name, color: COLORS_LIST[i] }));
+  positions = players.map(() => 0);
+  scores = players.map(() => 0);
+  currentPlayer = 0;
+  gameActive = true;
+
+  initQuestionPools();
+
+  document.getElementById('introScreen').style.display = 'none';
+  document.getElementById('gameScreen').style.display = 'block';
+
+  buildBoard();
+  updateUI();
+}
+
+function buildBoard() {
+  const board = document.getElementById('board');
+  board.innerHTML = '';
+  FIELDS.forEach((field, i) => {
+    const cell = document.createElement('div');
+    cell.className = `cell cell-${field.type}`;
+    cell.id = `cell-${i}`;
+    cell.innerHTML = `
+      <span class="cell-icon">${field.icon}</span>
+      <span class="cell-num">${i}</span>
+      <span class="cell-label">${field.label}</span>
+      <div class="player-tokens" id="tokens-${i}"></div>
+    `;
+    board.appendChild(cell);
+  });
+  renderTokens();
+}
+
+function renderTokens() {
+  FIELDS.forEach((_, i) => {
+    const c = document.getElementById(`tokens-${i}`);
+    if (c) c.innerHTML = '';
+  });
+  positions.forEach((pos, pi) => {
+    const c = document.getElementById(`tokens-${pos}`);
+    if (c) {
+      const t = document.createElement('div');
+      t.className = 'token';
+      t.style.background = players[pi].color;
+      c.appendChild(t);
+    }
+  });
+}
+
+function updateUI() {
+  const scoresEl = document.getElementById('playerScores');
+  scoresEl.innerHTML = players.map((p, i) => `
+    <div class="player-score ${i === currentPlayer ? 'active' : ''}">
+      <div class="mini-dot" style="background:${p.color}"></div>
+      ${p.name}: <strong>${scores[i]}</strong>⭐
+    </div>
+  `).join('');
+
+  document.getElementById('impactGoal').innerHTML = `Ziel: <strong>${WIN_SCORE} Impact-Punkte</strong> ⭐`;
+
+  const p = players[currentPlayer];
+  document.getElementById('turnInfo').innerHTML = `<span style="color:${p.color}">${p.name}</span> ist dran!`;
+
+  document.querySelectorAll('.cell').forEach(c => c.classList.remove('highlight'));
+  const cc = document.getElementById(`cell-${positions[currentPlayer]}`);
+  if (cc) cc.classList.add('highlight');
+
+  document.getElementById('diceArea').style.display = 'flex';
+  document.getElementById('scenarioCard').style.display = 'none';
+  document.getElementById('rollBtn').disabled = false;
+
+  // Pool info
+  document.getElementById('poolInfo').textContent = `Fragenlager: ${getUsedQuestions()} von ${getTotalQuestions()} Szenarien gespielt`;
+}
+
+function rollDice() {
+  const btn = document.getElementById('rollBtn');
+  const diceEl = document.getElementById('dice');
+  btn.disabled = true;
+  diceEl.classList.add('rolling');
+
+  let rolls = 0;
+  const interval = setInterval(() => {
+    diceEl.textContent = Math.floor(Math.random() * 6) + 1;
+    rolls++;
+    if (rolls > 8) {
+      clearInterval(interval);
+      const result = Math.floor(Math.random() * 6) + 1;
+      diceEl.textContent = result;
+      diceEl.classList.remove('rolling');
+      movePlayer(result);
+    }
+  }, 80);
+}
+
+function movePlayer(steps) {
+  const maxPos = FIELDS.length - 1;
+  let newPos = Math.min(positions[currentPlayer] + steps, maxPos);
+  positions[currentPlayer] = newPos;
+  renderTokens();
+
+  document.querySelectorAll('.cell').forEach(c => c.classList.remove('highlight'));
+  const cell = document.getElementById(`cell-${newPos}`);
+  if (cell) cell.classList.add('highlight');
+
+  if (newPos >= maxPos) {
+    scores[currentPlayer] += 5;
+    positions[currentPlayer] = 0;
+    renderTokens();
+  }
+
+  setTimeout(() => showScenario(), 600);
+}
+
+function showScenario() {
+  const pos = positions[currentPlayer];
+  const field = FIELDS[pos];
+  const type = field.type;
+
+  if (type === 'start' || type === 'goal') {
+    nextTurn();
+    return;
+  }
+
+  if (!SCENARIOS[type]) {
+    nextTurn();
+    return;
+  }
+
+  const scenario = getNextScenario(type);
+
+  document.getElementById('diceArea').style.display = 'none';
+  const card = document.getElementById('scenarioCard');
+  card.style.display = 'block';
+  card.style.animation = 'none';
+  card.offsetHeight;
+  card.style.animation = 'cardIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)';
+
+  const badgeLabels = { env:'🌱 Umwelt', social:'🤝 Soziales', community:'🏘️ Gemeinschaft', digital:'📱 Digital', event:'⚡ Event' };
+
+  document.getElementById('scenBadge').className = `category-badge badge-${type}`;
+  document.getElementById('scenBadge').textContent = badgeLabels[type] || type;
+  document.getElementById('scenTitle').textContent = scenario.title;
+  document.getElementById('scenStory').textContent = scenario.story;
+
+  const choicesEl = document.getElementById('scenChoices');
+  choicesEl.innerHTML = '';
+  document.getElementById('resultText').style.display = 'none';
+  document.getElementById('nextBtn').style.display = 'none';
+
+  scenario.choices.forEach((choice, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.textContent = choice.text;
+    btn.onclick = () => makeChoice(scenario, i);
+    choicesEl.appendChild(btn);
+  });
+}
+
+function makeChoice(scenario, choiceIndex) {
+  const choice = scenario.choices[choiceIndex];
+  const buttons = document.querySelectorAll('.choice-btn');
+
+  buttons.forEach((btn, i) => {
+    btn.disabled = true;
+    btn.style.cursor = 'default';
+    btn.style.opacity = i === choiceIndex ? '1' : '0.4';
+    if (i === choiceIndex) btn.classList.add(`chosen-${choice.level}`);
+  });
+
+  scores[currentPlayer] += choice.points;
+  if (scores[currentPlayer] < 0) scores[currentPlayer] = 0;
+
+  document.getElementById('playerScores').innerHTML = players.map((p, i) => `
+    <div class="player-score ${i === currentPlayer ? 'active' : ''}">
+      <div class="mini-dot" style="background:${p.color}"></div>
+      ${p.name}: <strong>${scores[i]}</strong>⭐
+    </div>
+  `).join('');
+
+  const resultEl = document.getElementById('resultText');
+  const pointsColor = choice.points > 0 ? 'var(--green)' : choice.points < 0 ? '#e74c3c' : 'var(--yellow)';
+  const pointsText = choice.points > 0 ? `+${choice.points}` : choice.points;
+  resultEl.innerHTML = `${choice.feedback}<div class="points-change" style="color:${pointsColor}">${pointsText} Impact-Punkte</div>`;
+  resultEl.style.display = 'block';
+  document.getElementById('nextBtn').style.display = 'block';
+
+  document.getElementById('poolInfo').textContent = `Fragenlager: ${getUsedQuestions()} von ${getTotalQuestions()} Szenarien gespielt`;
+
+  if (scores[currentPlayer] >= WIN_SCORE) {
+    setTimeout(() => showWin(), 800);
+  }
+}
+
+function nextTurn() {
+  currentPlayer = (currentPlayer + 1) % players.length;
+  updateUI();
+}
+
+function showWin() {
+  const winner = players[currentPlayer];
+  document.getElementById('winOverlay').style.display = 'flex';
+  document.getElementById('winnerName').textContent = `${winner.name} gewinnt!`;
+  document.getElementById('winMessage').textContent = `Mit ${scores[currentPlayer]} Impact-Punkten hast du gezeigt: Jede Entscheidung zählt. Du bist ein echter Changemaker! 🌍`;
+
+  const sorted = players.map((p, i) => ({ ...p, score: scores[i] })).sort((a, b) => b.score - a.score);
+  document.getElementById('finalScores').innerHTML = sorted.map(p => `
+    <div class="final-score-card">
+      <div class="name" style="color:${p.color}">${p.name}</div>
+      <div class="score" style="color:${p.color}">${p.score}⭐</div>
+    </div>
+  `).join('');
+}
+</script>
+</body>
+</html>
