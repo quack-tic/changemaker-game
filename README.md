@@ -47,27 +47,6 @@ Das Spiel verwendet ein intelligentes Fragen-System:
 
 Das bedeutet: Auch bei 4 Spielern und mehreren Runden erlebt ihr immer neue Situationen.
 
-## 🚀 Selbst hosten
-
-### GitHub Pages (empfohlen)
-
-1. Repository forken oder erstellen
-2. `index.html` hochladen
-3. **Settings → Pages → Source: Deploy from branch → main → / (root) → Save**
-4. Nach 1–2 Minuten live unter `https://Username.github.io/changemaker-game/`
-
-### Lokal spielen
-
-Einfach die `index.html` im Browser öffnen – fertig. Keine Installation, kein Server, keine Abhängigkeiten.
-
-## 🛠️ Technik
-
-- **Reine HTML/CSS/JS** – keine Frameworks, keine Build-Tools, keine Abhängigkeiten
-- **Eine einzige Datei** – alles in `index.html`
-- **Offline-fähig** – funktioniert ohne Internet (nach erstem Laden der Schriftarten)
-- **Responsiv** – funktioniert auf Desktop, Tablet und Smartphone
-- **Keine Cookies, kein Tracking, keine Datenerhebung**
-
 ## 📚 Pädagogischer Hintergrund
 
 Das Spiel wurde für den Einsatz in Schulen, Jugendgruppen und der außerschulischen Bildung entwickelt. Es eignet sich besonders für:
